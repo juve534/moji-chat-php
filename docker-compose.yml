@@ -5,17 +5,21 @@ volumes:
         driver: local
 
 services:
-    slim:
-        image: php:7-alpine
-        working_dir: /var/www
-        command: php -S 0.0.0.0:8080 -t public
-        environment:
-            docker: "true"
-        ports:
-            - 8080:8080
+    slim_nginx:
+        image: nginx:alpine
         volumes:
-            - .:/var/www
-            - logs:/var/www/logs
+            - ./docker/nginx/:/etc/nginx/conf.d/
+            - ./public:/var/www/moji-chat-php/public
+        ports:
+            - 8080:80
+        depends_on:
+            - slim
+        networks:
+            - slim_net
+    slim:
+        image: php:7.3-fpm-stretch
+        volumes:
+            - ./:/var/www/html
         networks:
             - slim_net
     moji-cache:
