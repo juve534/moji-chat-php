@@ -16,3 +16,14 @@ services:
         volumes:
             - .:/var/www
             - logs:/var/www/logs
+        networks:
+            - slim_net
+    moji-cache:
+        image: redis:latest
+        ports:
+            - 6379:6379
+        networks:
+            - slim_net
+networks:
+    slim_net:
+        driver: bridge
