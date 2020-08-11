@@ -1,0 +1,28 @@
+#.circleci/config.yml
+version: 2
+
+jobs:
+  build:
+    docker:
+      - image: circleci/php:7.3
+      - image: circleci/redis:latest
+
+    working_directory: ~/app # directory where steps will run
+    steps:
+      - checkout
+      - run: sudo -E docker-php-ext-install pdo_mysql opcache
+
+      # Composer Speed UP
+      - run: composer config -g repos.packagist composer https://packagist.jp
+      - run: composer global require hirak/prestissimo
+
+      - restore_cache:
+          keys:
+            - composer-v1-{{ checksum "composer.lock" }}
+            - composer-v1-
+      - run: composer install -n --prefer-dist
+      - save_cache:
+          key: composer-v1-{{ checksum "composer.lock" }}
+          paths:
+            - vendor
+      - run: ./vendor/bin/phpunit tests/
